@@ -14,10 +14,11 @@
 
             var inputField = jq('select[name="adress"]');
 
-            inputField.on('select2:select', function (e) {
+            inputField.on('change', function (e) {
 
                 var target = jq(e.target),
-                    value = target.text().trim();
+                    selectedOption = target.find('option:selected'),
+                    value = selectedOption.text();
 
                 jq.ajax({
                     url: '<%= getStandaloneUrl("/getAddressData") %>',
@@ -65,6 +66,7 @@
             inputField.select2({
                 placeholder: "Ange en adress",
                 minimumInputLength: 2,
+                allowClear: true,
                 language: {
                     errorLoading: function () {
                         return 'Resultat kunde inte laddas.';
