@@ -35,7 +35,10 @@
                 value = keysJSON[key];
 
                 if (value.toLowerCase().indexOf(searchString) > -1) {
-                    addresses.push(value);
+                    addresses.push({
+                        id: counter,
+                        text: value
+                    });
                     counter++;
                 }
 

@@ -1,1 +1,124 @@
+<script src="<%= getResourceUrl('select2/select2.full.min.js') %>"></script>
+<link rel="stylesheet" type="text/css" href="<%= getResourceUrl('select2/select2.min.css') %>">
+
 <%= renderer.renderComponent('Search') %>
+
+
+<script>
+
+    (function (jq) {
+
+        'use strict';
+
+        svDocReady(function () {
+
+            var inputField = jq('select[name="adress"]');
+
+            inputField.on('select2:select', function (e) {
+
+                var target = jq(e.target),
+                    value = target.text().trim();
+
+                jq.ajax({
+                    url: '<%= getStandaloneUrl("/getAddressData") %>',
+                    data: {
+                        clickedValue: value
+                    },
+                    success: function (response) {
+
+                        var detailHolder = jq('.af-stadsomradesvaljare-details'),
+                            data = response.data,
+                            row, cell1, cell2, value;
+
+                        detailHolder.empty();
+
+                        if (response.success && data) {
+
+                            for (var key in data) {
+
+                                row = jq('<div />', {
+                                    class: 'env-d--flex'
+                                });
+
+                                value = data[key];
+
+                                cell1 = jq('<div />', {
+                                    text: key,
+                                    class: 'env-flex-length--1'
+                                });
+
+                                cell2 = jq('<div />', {
+                                    text: value,
+                                    class: 'env-flex-length--2'
+                                });
+
+                                row.append(cell1);
+                                row.append(cell2);
+
+                                detailHolder.append(row);
+                            }
+                        }
+                    }
+                });
+            });
+
+            inputField.select2({
+                placeholder: "Ange en adress",
+                minimumInputLength: 2,
+                language: {
+                    errorLoading: function () {
+                        return 'Resultat kunde inte laddas.';
+                    },
+                    inputTooLong: function (args) {
+                        var overChars = args.input.length - args.maximum;
+
+                        var message = 'Vänligen sudda ut ' + overChars + ' tecken';
+
+                        return message;
+                    },
+                    inputTooShort: function (args) {
+                        var remainingChars = args.minimum - args.input.length;
+
+                        var message = 'Vänligen skriv in ' + remainingChars +
+                            ' eller fler tecken';
+
+                        return message;
+                    },
+                    loadingMore: function () {
+                        return 'Laddar fler resultat…';
+                    },
+                    maximumSelected: function (args) {
+                        var message = 'Du kan max välja ' + args.maximum + ' element';
+
+                        return message;
+                    },
+                    noResults: function () {
+                        return 'Inga träffar';
+                    },
+                    searching: function () {
+                        return 'Söker…';
+                    },
+                    removeAllItems: function () {
+                        return 'Ta bort alla objekt';
+                    }
+                },
+                dataType: 'json',
+                ajax: {
+                    url: '<%= getStandaloneUrl("/doAddressSearch") %>',
+                    data: function (params) {
+                        return {
+                            searchString: params.term
+                        }
+                    },
+                    processResults: function (response) {
+                        return {
+                            results: response.addresses
+                        };
+                    },
+                }
+            });
+        });
+
+    }(jQuery));
+
+</script>
